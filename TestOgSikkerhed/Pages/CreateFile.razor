@@ -1,0 +1,101 @@
+﻿@page "/createfile"
+@using System.Runtime.InteropServices
+@inject IJSRuntime JsRuntime
+
+<PageTitle>Create File (Page Title)</PageTitle>
+
+<h1>Create File</h1>
+
+
+<button class="btn btn-primary" @onclick="CreateFileOnServer">Click to create a .txt file</button>
+
+@code {
+
+    int count;
+    string fileName_Windows = "C:\\Users\\jbo\\Documents\\Github\\Skole\\TestOgSikkerhed\\FileDownloads\\";
+    string fileName_Windows_nikol = "C:\\Users\\nikol\\Documents\\";
+    string fileName_Linux = "//usr//bin//FileDownloads//";
+    string fileName_Initial = "";
+    string fileName_Current = "";
+    string fileName_Input = "";
+    string fileExt = ".txt";
+    bool invalidOS = false;
+
+    private async Task TypeFileName()
+    {
+        fileName_Input = await JsRuntime.InvokeAsync<string>("prompt", "Select filename:"); // Prompt
+    }
+
+    private async void CreateFileOnServer()
+    {
+        await TypeFileName();
+
+        while (HasSpecialChars(fileName_Input))
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Filename may not contain any special symbols!"); // Alert
+            await TypeFileName();
+        }
+
+        if (OperatingSystem.IsWindows())
+        {
+            fileName_Initial = fileName_Windows_nikol + fileName_Input + fileExt;
+            fileName_Current = fileName_Initial;
+        }
+        else
+        if (OperatingSystem.IsLinux())
+        {
+            fileName_Initial = fileName_Linux + fileName_Input + fileExt;
+            fileName_Current = fileName_Initial;
+        }
+        else
+        if (OperatingSystem.IsMacOS())
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Error: MacOS not supported.");
+            Console.WriteLine("Error: MacOS not supported.");
+            invalidOS = true;
+        }
+
+        if (invalidOS == false)
+        {
+            
+            while (File.Exists(fileName_Current))
+            {
+                count++;
+                fileName_Current = Path.GetDirectoryName(fileName_Initial)
+                     + Path.DirectorySeparatorChar
+                     + Path.GetFileNameWithoutExtension(fileName_Initial)
+                     + count.ToString()
+                     + Path.GetExtension(fileName_Initial);
+            }
+
+            FileInfo MyFile = new FileInfo(fileName_Current);
+            if (MyFile.Exists == false)
+            {
+                FileStream fs = MyFile.Create();
+                fs.Close();
+
+                if (File.Exists(fileName_Current))
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "A file was successfully created on the server!");
+                }
+            }
+        }
+    }
+
+    public static class OperatingSystem
+    {
+        public static bool IsWindows() =>
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+        public static bool IsLinux() =>
+            RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
+        public static bool IsMacOS() =>
+            RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+    }
+
+    private bool HasSpecialChars(string yourString)
+    {
+        return yourString.Any(ch => !char.IsLetterOrDigit(ch));
+    }
+}

@@ -1,0 +1,48 @@
+﻿@page "/counter"
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject RoleManager<IdentityRole> RoleManager
+@inject UserManager<IdentityUser> UserManager
+
+<PageTitle>Counter</PageTitle>
+
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+
+        <ul>
+            @foreach(var user in Users)
+            {
+                <li>Username: @user.UserName   Role:  </li>
+            }
+        </ul>
+
+        <h1>Counter</h1>
+
+        <p role="status">Current count: @currentCount</p>
+
+        <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+    </Authorized>
+    <NotAuthorized>
+        <h1>Not authorized</h1>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private int currentCount = 0;
+
+    private List<IdentityRole> Roles = new List<IdentityRole>();
+    private List<IdentityUser> Users = new List<IdentityUser>();
+
+
+    protected override async Task OnInitializedAsync() 
+    {
+        Users = await UserManager.Users.ToListAsync();
+        Roles = await RoleManager.Roles.ToListAsync();
+    }
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}

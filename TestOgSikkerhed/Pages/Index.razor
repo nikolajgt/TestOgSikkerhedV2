@@ -1,0 +1,79 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using TestOgSikkerhed.Data
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor http
+@inject AuthenticationStateProvider _authProvider
+@inject IServiceProvider _provider
+@inject MyRoleHandler roleHandler
+
+@page "/"
+
+<PageTitle>Index</PageTitle>
+
+@if(IsAuthenticated)
+{
+    <button class="btn btn-primary" @onclick="@(async () => await UpgradeUserToAdmin())"></button>
+    <h1>test</h1>
+
+    @if(IsAdmin)
+    {
+        <h1>is Admin</h1>
+    }
+}
+
+
+@*<AuthorizeView Policy="RequireAuthenticatedUser">
+    <Authorized>
+        <h1>You are logged in as a normal user</h1>
+    </Authorized>
+    <NotAuthorized>
+        <h1>Not authorized</h1>
+    </NotAuthorized>
+</AuthorizeView>*@
+
+
+@code {
+    public bool IsAuthenticated { get; set; }
+    public bool IsAdmin { get; set; }
+
+    private ClaimsPrincipal userClaims { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var authState = await _authProvider.GetAuthenticationStateAsync();
+
+        userClaims = authState.User;
+
+        IsAuthenticated = IsAuthenticatedCheck();
+
+        if(IsAuthenticated)
+            IsAdmin = userClaims.IsInRole("Admin");
+
+
+    }
+
+
+
+    private async Task UpgradeUserToAdmin()
+    {
+        string name = userClaims.Identities.FirstOrDefault().Name;
+        await roleHandler.CreateUserRoles(name, "Admin", _provider);
+
+        var authState = await _authProvider.GetAuthenticationStateAsync();
+        userClaims = authState.User;
+
+        IsAuthenticated = IsAuthenticatedCheck();
+
+        //if()
+        //    StateHasChanged();
+    }
+
+    private bool IsAuthenticatedCheck()
+    {
+        return userClaims.Identity != null ? userClaims.Identity.IsAuthenticated : false;
+    }
+}
