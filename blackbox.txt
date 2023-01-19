@@ -1,0 +1,25 @@
+Black box testing:
+step by step med hvad vi forventer f.eks..
+
+1. User Besøger hjemmesiden
+2. User trykker på registrer
+3. User udfylder email og password x 2
+4. User skal godkende email
+5. User for aktiveringskode på email ( Vi opsnapper bare fra kode )
+6. User aktiver kontoen
+7. User kan tryppe på knap for at blive admin
+8. User kan nu se nyt tekst
+
+1. User kan besøge createfile side
+2. User kan createfile på begge operativ systemer
+3. User kan indstaste navnet på filen
+
+
+
+normal unittest:
+Test db string
+test fil
+
+
+OS test:
+Bare kunne køre og oprette fil på win og linux

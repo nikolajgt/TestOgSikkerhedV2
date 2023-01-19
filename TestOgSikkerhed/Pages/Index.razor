@@ -14,7 +14,7 @@
 
 @if(IsAuthenticated)
 {
-    <button class="btn btn-primary" @onclick="@(async () => await UpgradeUserToAdmin())"></button>
+    <button class="btn btn-primary" @onclick="@(async () => await UpgradeUserToAdmin())">Upgrade user to admin</button>
     <h1>test</h1>
 
     @if(IsAdmin)
@@ -53,7 +53,6 @@
         if(IsAuthenticated)
             IsAdmin = userClaims.IsInRole("Admin");
 
-
     }
 
 
@@ -68,8 +67,17 @@
 
         IsAuthenticated = IsAuthenticatedCheck();
 
-        //if()
-        //    StateHasChanged();
+        if(IsAuthenticated)
+            IsAdmin = userClaims.IsInRole("Admin");
+
+        StateHasChanged();
+    }
+
+    private async Task<ClaimsPrincipal> GetUserClaimsState()
+    {
+        var authState = await _authProvider.GetAuthenticationStateAsync();
+
+        return authState.User;
     }
 
     private bool IsAuthenticatedCheck()
