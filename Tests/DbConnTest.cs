@@ -45,40 +45,27 @@ namespace Tests
         [Fact]
         public void DatabaseConnectionTest()
         {
-            DbContextOptions<ApplicationDbContext> options = new(); ;
 
-            try
-            {
-                // Arrange
-                options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                    .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestOgSikkerhed;Trusted_Connection=True;MultipleActiveResultSets=true")
-                    .Options;
+            // Arrange
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestOgSikkerhed;Trusted_Connection=True;MultipleActiveResultSets=true")
+                .Options;
 
 
-                // Act
-                using (var context = new ApplicationDbContext(options))
-                {
-                    context.Database.EnsureCreated();
-                    context.Dispose();
-                }
+            // Act
+            using var context = new ApplicationDbContext(options);
+   
+            context.Database.OpenConnection();
 
-            }
-            catch (Exception ex)
-            {
 
-                Assert.Fail(ex.Message);
 
-            }
-            finally
-            {
-                // Assert
-                using (var context = new ApplicationDbContext(options))
-                {
-                    Assert.Equal(ConnectionState.Open, context.Database.GetDbConnection().State);
-                    context.Dispose();
-                }
 
-            }
-        }
+
+            // Assert
+            Assert.Equal(ConnectionState.Open, context.Database.GetDbConnection().State);
+             context.Dispose();
+
+        }            
+        
     }
 }

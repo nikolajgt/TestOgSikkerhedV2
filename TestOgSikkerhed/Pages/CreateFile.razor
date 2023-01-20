@@ -20,15 +20,23 @@
     string fileName_Input = "";
     string fileExt = ".txt";
     bool invalidOS = false;
+    bool fileCreated = false;
 
     private async Task TypeFileName()
     {
         fileName_Input = await JsRuntime.InvokeAsync<string>("prompt", "Select filename:"); // Prompt
     }
 
+    public bool UnitTestCreateFile(string filename)
+    {
+        return true;
+    }
+
+
     private async void CreateFileOnServer()
     {
         await TypeFileName();
+
 
         while (HasSpecialChars(fileName_Input))
         {
@@ -57,7 +65,7 @@
 
         if (invalidOS == false)
         {
-            
+
             while (File.Exists(fileName_Current))
             {
                 count++;
@@ -77,9 +85,11 @@
                 if (File.Exists(fileName_Current))
                 {
                     await JsRuntime.InvokeVoidAsync("alert", "A file was successfully created on the server!");
+                    fileCreated = true;
                 }
             }
         }
+
     }
 
     public static class OperatingSystem
